@@ -2,6 +2,7 @@ package fr.manuvai.tereroa.controllers;
 
 import fr.manuvai.tereroa.api.UsersApi;
 import fr.manuvai.tereroa.api.models.UserDto;
+import fr.manuvai.tereroa.exceptions.NotFoundException;
 import fr.manuvai.tereroa.mappers.UserMapper;
 import fr.manuvai.tereroa.models.User;
 import fr.manuvai.tereroa.repositories.UserRepository;
@@ -20,7 +21,7 @@ public class UserController implements UsersApi {
     @Override
     public ResponseEntity<UserDto> getUser(Integer id) {
         User user = userRepository.findById(id.longValue())
-                .orElseThrow(() -> new RuntimeException("404 not found"));
+                .orElseThrow(NotFoundException::new);
 
         return ResponseEntity.ok(UserMapper.INSTANCE.entityToDto(user));
     }
