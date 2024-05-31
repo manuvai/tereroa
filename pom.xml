@@ -155,6 +155,15 @@
 							<configOptions>
 								<useJakartaEe>true</useJakartaEe>
 								<interfaceOnly>true</interfaceOnly>
+								<skipDefaultInterface>true</skipDefaultInterface>
+								<useSpringController>true</useSpringController>
+								<additionalModelTypeAnnotations>
+									@lombok.Data
+									@lombok.Builder
+									@lombok.NoArgsConstructor
+									@lombok.AllArgsConstructor
+									@lombok.Generated
+								</additionalModelTypeAnnotations>
 							</configOptions>
 						</configuration>
 					</execution>
