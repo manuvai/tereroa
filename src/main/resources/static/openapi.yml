@@ -5,6 +5,60 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
+  /vehicles/{id}:
+    get:
+      tags:
+        - Gestion des véhicules
+      summary: Consultation d'un véhicule
+      operationId: getVehicle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleDto'
+        404:
+          description: Not Found
+        500:
+          description: Internal Error
+  /vehicles:
+    get:
+      tags:
+        - Gestion des véhicules
+      summary: Consultation de la liste des véhicules
+      operationId: getAllVehicles
+      parameters:
+        - name: tripStartDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: tripEndDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleDto'
+        500:
+          description: Internal Error
+
   /users:
     get:
       summary: Consultation de la liste des utilisateurs
@@ -31,15 +85,31 @@ paths:
           schema:
             type: integer
       responses:
-        "202":
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserDto"
+        404:
+          description: Not Found
+        500:
+          description: Internal Error
 
 components:
   schemas:
+    VehicleDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        pricePerDay:
+          type: number
+        owner:
+          $ref: '#/components/schemas/UserDto'
+
     UserDto:
       type: object
       properties:
@@ -51,3 +121,4 @@ components:
           type: string
         email:
           type: string
+          format: email
