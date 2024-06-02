@@ -41,22 +41,25 @@ public class VehicleService {
     }
 
     private boolean hasReservationCross(Reservation reservation, OffsetDateTime start, OffsetDateTime end) {
-
-        OffsetDateTime reservationStart = null;
-        OffsetDateTime reservationEnd = null;
+        boolean isCrossingBefore = false;
+        boolean isCrossingAfter = false;
+        boolean isStartOrEndEqual = false;
 
         if (reservation != null) {
-            reservationStart = reservation.getStartDate()
+            OffsetDateTime reservationStart = reservation.getStartDate()
                     .toInstant()
                     .atOffset(ZoneOffset.UTC);
-            reservationEnd = reservation.getEndDate()
+            OffsetDateTime reservationEnd = reservation.getEndDate()
                     .toInstant()
                     .atOffset(ZoneOffset.UTC);
+
+            isCrossingBefore = reservationEnd.isAfter(end) && reservationStart.isBefore(end);
+            isCrossingAfter = reservationStart.isBefore(start) && reservationEnd.isAfter(start);
+            isStartOrEndEqual = reservationStart.isEqual(start) || reservationEnd.isEqual(end);
         }
 
-        return reservation != null
-                && (reservationEnd.isAfter(end) && reservationStart.isBefore(end)
-                        || reservationStart.isBefore(start) && reservationEnd.isAfter(start));
+
+        return isCrossingBefore || isCrossingAfter || isStartOrEndEqual;
     }
 
 }
