@@ -13,6 +13,7 @@ import java.util.Set;
 @Setter
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
@@ -24,7 +25,7 @@ public class User {
     @Column
     private String email;
 
-    @OneToMany
+    @OneToMany(mappedBy = "customer")
     private Set<Reservation> reservationSet;
 
     @Override

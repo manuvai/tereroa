@@ -13,6 +13,7 @@ import java.util.Set;
 @Setter
 public class Vehicle {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
@@ -24,7 +25,7 @@ public class Vehicle {
     @ManyToOne
     private User owner;
 
-    @OneToMany
+    @OneToMany(mappedBy = "vehicle")
     private Set<Reservation> reservationSet;
 
     @Override

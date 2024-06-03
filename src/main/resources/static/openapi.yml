@@ -95,6 +95,31 @@ paths:
           description: Not Found
         500:
           description: Internal Error
+  /users/{id}/reservations:
+    get:
+      tags:
+        - Gestion des utilisateurs
+      summary: Consultation des réservations d'un utilisateur
+      operationId: getUserReservations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservationDto"
+        404:
+          description: Not Found
+        500:
+          description: Internal Error
 
 components:
   schemas:
@@ -122,3 +147,19 @@ components:
         email:
           type: string
           format: email
+
+    ReservationDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        customer:
+          $ref: '#/components/schemas/UserDto'
+        vehicle:
+          $ref: '#/components/schemas/VehicleDto'
