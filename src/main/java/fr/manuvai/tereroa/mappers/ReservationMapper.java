@@ -1,10 +1,10 @@
 package fr.manuvai.tereroa.mappers;
 
 import fr.manuvai.tereroa.api.models.ReservationDto;
-import fr.manuvai.tereroa.api.models.VehicleDto;
 import fr.manuvai.tereroa.models.Reservation;
-import org.aspectj.lang.annotation.Before;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.time.OffsetDateTime;

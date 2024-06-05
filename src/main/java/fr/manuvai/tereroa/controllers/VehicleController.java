@@ -1,18 +1,17 @@
 package fr.manuvai.tereroa.controllers;
 
 import fr.manuvai.tereroa.api.VehiclesApi;
+import fr.manuvai.tereroa.api.models.ReservationDto;
 import fr.manuvai.tereroa.api.models.VehicleDto;
-import fr.manuvai.tereroa.exceptions.NotFoundException;
 import fr.manuvai.tereroa.exceptions.TripDatesIncorrectException;
+import fr.manuvai.tereroa.mappers.ReservationMapper;
 import fr.manuvai.tereroa.mappers.VehicleMapper;
 import fr.manuvai.tereroa.models.Vehicle;
-import fr.manuvai.tereroa.repositories.VehicleRepository;
 import fr.manuvai.tereroa.services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -22,17 +21,24 @@ public class VehicleController implements VehiclesApi {
     @Autowired
     VehicleService vehicleService;
 
-    @Autowired
-    VehicleRepository vehicleRepository;
-
     @Override
     public ResponseEntity<VehicleDto> getVehicle(Integer id) {
-        Vehicle vehicle = vehicleRepository.findById(id.longValue())
-                .orElseThrow(NotFoundException::new);
+        Vehicle vehicle = vehicleService.findById(id.longValue());
 
         VehicleDto vehicleDto = VehicleMapper.INSTANCE.entityToDto(vehicle);
 
         return ResponseEntity.ok(vehicleDto);
+    }
+
+    @Override
+    public ResponseEntity<List<ReservationDto>> getVehicleReservations(Integer id) {
+        Vehicle vehicle = vehicleService.findById(id.longValue());
+        List<ReservationDto> reservationDtoList = vehicle.getReservationSet()
+                .stream()
+                .map(ReservationMapper.INSTANCE::entityToDto)
+                .toList();
+
+        return ResponseEntity.ok(reservationDtoList);
     }
 
     @Override

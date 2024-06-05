@@ -1,5 +1,6 @@
 package fr.manuvai.tereroa.services;
 
+import fr.manuvai.tereroa.exceptions.NotFoundException;
 import fr.manuvai.tereroa.models.Reservation;
 import fr.manuvai.tereroa.models.Vehicle;
 import fr.manuvai.tereroa.repositories.VehicleRepository;
@@ -17,8 +18,17 @@ public class VehicleService {
     @Autowired
     VehicleRepository vehicleRepository;
 
+    public List<Vehicle> findAll() {
+        return vehicleRepository.findAll();
+    }
+
+    public Vehicle findById(Long id) {
+        return vehicleRepository.findById(id)
+                .orElseThrow(NotFoundException::new);
+    }
+
     public List<Vehicle> findAllAvailable(OffsetDateTime start, OffsetDateTime end) {
-        List<Vehicle> vehicles = vehicleRepository.findAll();
+        List<Vehicle> vehicles = findAll();
 
         if (start != null && end != null) {
             vehicles = vehicles.stream()

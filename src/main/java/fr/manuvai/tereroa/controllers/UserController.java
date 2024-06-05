@@ -3,11 +3,9 @@ package fr.manuvai.tereroa.controllers;
 import fr.manuvai.tereroa.api.UsersApi;
 import fr.manuvai.tereroa.api.models.ReservationDto;
 import fr.manuvai.tereroa.api.models.UserDto;
-import fr.manuvai.tereroa.exceptions.NotFoundException;
 import fr.manuvai.tereroa.mappers.ReservationMapper;
 import fr.manuvai.tereroa.mappers.UserMapper;
 import fr.manuvai.tereroa.models.User;
-import fr.manuvai.tereroa.repositories.UserRepository;
 import fr.manuvai.tereroa.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +35,6 @@ public class UserController implements UsersApi {
                 .stream()
                 .map(ReservationMapper.INSTANCE::entityToDto)
                 .toList();
-
         return ResponseEntity.ok(userReservationDtos);
     }
 
