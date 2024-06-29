@@ -175,6 +175,9 @@ components:
       properties:
         id:
           type: integer
+        total:
+          type: number
+          multipleOf: 0.01
         startDate:
           type: string
           format: date-time
