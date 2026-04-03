@@ -6,25 +6,22 @@ import fr.manuvai.tereroa.models.Vehicle;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-@Mapper(uses = {VehicleMapper.class, UserMapper.class})
+@Mapper(componentModel = "spring", uses = {VehicleMapper.class, UserMapper.class})
 public interface ReservationMapper {
 
-    ReservationMapper INSTANCE = Mappers.getMapper(ReservationMapper.class);
-
-    @Named("dateToOffsetDateTime")
-    default OffsetDateTime dateToOffsetDateTime(Date date) {
+    @Named("localDateToOffsetDateTime")
+    default OffsetDateTime localDateToOffsetDateTime(LocalDate date) {
         return date == null
                 ? null
-                : date.toInstant().atOffset(ZoneOffset.UTC);
+                : date.atStartOfDay().atOffset(ZoneOffset.UTC);
     }
 
     @Named("getTotalAmount")
@@ -33,29 +30,24 @@ public interface ReservationMapper {
             return BigDecimal.ZERO;
         }
 
-        Date startDate = reservation.getStartDate();
-        Date endDate = reservation.getEndDate();
+        LocalDate startDate = reservation.getStartDate();
+        LocalDate endDate = reservation.getEndDate();
 
         if (startDate == null || endDate == null) {
             return BigDecimal.ZERO;
         }
 
-        long diffInMillis = Math.abs(endDate.getTime() - startDate.getTime());
+        long days = ChronoUnit.DAYS.between(startDate, endDate);
 
-        long diff = TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS);
-
-        Double costPerDay = Optional.ofNullable(reservation.getVehicle())
+        BigDecimal costPerDay = Optional.ofNullable(reservation.getVehicle())
                 .map(Vehicle::getPricePerDay)
-                .orElse(0D);
+                .orElse(BigDecimal.ZERO);
 
-        return BigDecimal.valueOf(costPerDay * diff);
+        return costPerDay.multiply(BigDecimal.valueOf(days));
     }
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "customer", target = "customer")
-    @Mapping(source = "vehicle", target = "vehicle")
-    @Mapping(source = "startDate", target = "startDate", qualifiedByName = "dateToOffsetDateTime")
-    @Mapping(source = "endDate", target = "endDate", qualifiedByName = "dateToOffsetDateTime")
+    @Mapping(source = "startDate", target = "startDate", qualifiedByName = "localDateToOffsetDateTime")
+    @Mapping(source = "endDate", target = "endDate", qualifiedByName = "localDateToOffsetDateTime")
     @Mapping(source = "entity", target = "total", qualifiedByName = "getTotalAmount")
     ReservationDto entityToDto(Reservation entity);
 }

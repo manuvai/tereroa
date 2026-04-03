@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -17,10 +17,10 @@ public class Reservation {
     private Long id;
 
     @Column
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column
-    private Date endDate;
+    private LocalDate endDate;
 
     @ManyToOne
     private User customer;
@@ -32,13 +32,11 @@ public class Reservation {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof final Reservation that)) return false;
-        return Objects.equals(id, that.id) && Objects.equals(startDate, that.startDate)
-                && Objects.equals(endDate, that.endDate) && Objects.equals(customer, that.customer)
-                && Objects.equals(vehicle, that.vehicle);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startDate, endDate, customer, vehicle);
+        return Objects.hash(id);
     }
 }

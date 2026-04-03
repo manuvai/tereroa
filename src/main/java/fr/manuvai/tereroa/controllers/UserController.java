@@ -7,33 +7,32 @@ import fr.manuvai.tereroa.mappers.ReservationMapper;
 import fr.manuvai.tereroa.mappers.UserMapper;
 import fr.manuvai.tereroa.models.User;
 import fr.manuvai.tereroa.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class UserController implements UsersApi {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+    private final UserMapper userMapper;
+    private final ReservationMapper reservationMapper;
 
     @Override
     public ResponseEntity<UserDto> getUser(Integer id) {
         User user = userService.findById(id.longValue());
 
-        return ResponseEntity.ok(UserMapper.INSTANCE.entityToDto(user));
+        return ResponseEntity.ok(userMapper.entityToDto(user));
     }
 
     @Override
     public ResponseEntity<List<ReservationDto>> getUserReservations(Integer id) {
-
-        User user = userService.findById(id.longValue());
-
-        List<ReservationDto> userReservationDtos = user.getReservationSet()
+        List<ReservationDto> userReservationDtos = userService.findReservationsByUserId(id.longValue())
                 .stream()
-                .map(ReservationMapper.INSTANCE::entityToDto)
+                .map(reservationMapper::entityToDto)
                 .toList();
         return ResponseEntity.ok(userReservationDtos);
     }
@@ -42,7 +41,7 @@ public class UserController implements UsersApi {
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<User> users = userService.findAll();
         List<UserDto> userDtos = users.stream()
-                .map(UserMapper.INSTANCE::entityToDto)
+                .map(userMapper::entityToDto)
                 .toList();
 
         return ResponseEntity.ok(userDtos);

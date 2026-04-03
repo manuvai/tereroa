@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,19 +26,18 @@ public class User {
     @Column
     private String email;
 
-    @OneToMany(mappedBy = "customer")
-    private Set<Reservation> reservationSet;
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
+    private Set<Reservation> reservationSet = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof final User user)) return false;
-        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName)
-                && Objects.equals(lastName, user.lastName) && Objects.equals(email, user.email);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email);
+        return Objects.hash(id);
     }
 }

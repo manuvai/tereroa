@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,24 +22,23 @@ public class Vehicle {
     private String name;
 
     @Column
-    private Double pricePerDay;
+    private BigDecimal pricePerDay;
 
     @ManyToOne
     private User owner;
 
-    @OneToMany(mappedBy = "vehicle")
-    private Set<Reservation> reservationSet;
+    @OneToMany(mappedBy = "vehicle", fetch = FetchType.LAZY)
+    private Set<Reservation> reservationSet = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof final Vehicle vehicle)) return false;
-        return Objects.equals(id, vehicle.id) && Objects.equals(name, vehicle.name)
-                && Objects.equals(pricePerDay, vehicle.pricePerDay) && Objects.equals(owner, vehicle.owner);
+        return Objects.equals(id, vehicle.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, pricePerDay, owner);
+        return Objects.hash(id);
     }
 }

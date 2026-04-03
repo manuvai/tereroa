@@ -1,22 +1,24 @@
 package fr.manuvai.tereroa.services;
 
 import fr.manuvai.tereroa.exceptions.NotFoundException;
+import fr.manuvai.tereroa.exceptions.TripDatesIncorrectException;
 import fr.manuvai.tereroa.models.Reservation;
 import fr.manuvai.tereroa.models.Vehicle;
 import fr.manuvai.tereroa.repositories.VehicleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class VehicleService {
 
-    @Autowired
-    VehicleRepository vehicleRepository;
+    private final VehicleRepository vehicleRepository;
 
     public List<Vehicle> findAll() {
         return vehicleRepository.findAll();
@@ -27,10 +29,31 @@ public class VehicleService {
                 .orElseThrow(NotFoundException::new);
     }
 
-    public List<Vehicle> findAllAvailable(OffsetDateTime start, OffsetDateTime end) {
+    @Transactional(readOnly = true)
+    public Set<Reservation> findReservationsByVehicleId(Long id) {
+        return findById(id).getReservationSet();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Vehicle> findAllAvailable(OffsetDateTime tripStartDate, OffsetDateTime tripEndDate) {
+        if (tripStartDate == null ^ tripEndDate == null) {
+            throw new TripDatesIncorrectException();
+        }
+
+        if (tripStartDate != null) {
+            boolean isInvalid = tripEndDate.isBefore(tripStartDate)
+                    || tripStartDate.toLocalDate().isBefore(LocalDate.now());
+            if (isInvalid) {
+                throw new TripDatesIncorrectException();
+            }
+        }
+
         List<Vehicle> vehicles = findAll();
 
-        if (start != null && end != null) {
+        if (tripStartDate != null && tripEndDate != null) {
+            LocalDate start = tripStartDate.toLocalDate();
+            LocalDate end = tripEndDate.toLocalDate();
+
             vehicles = vehicles.stream()
                     .filter(vehicle -> isVehicleAvailable(vehicle, start, end))
                     .toList();
@@ -39,37 +62,27 @@ public class VehicleService {
         return vehicles;
     }
 
-    private boolean isVehicleAvailable(Vehicle vehicle, OffsetDateTime start, OffsetDateTime end) {
-
+    private boolean isVehicleAvailable(Vehicle vehicle, LocalDate start, LocalDate end) {
         return vehicle != null
                 && start != null
                 && end != null
                 && vehicle.getReservationSet()
                         .stream()
                         .noneMatch(reservation -> hasReservationCross(reservation, start, end));
-
     }
 
-    private boolean hasReservationCross(Reservation reservation, OffsetDateTime start, OffsetDateTime end) {
-        boolean isCrossingBefore = false;
-        boolean isCrossingAfter = false;
-        boolean isStartOrEndEqual = false;
-
-        if (reservation != null) {
-            OffsetDateTime reservationStart = reservation.getStartDate()
-                    .toInstant()
-                    .atOffset(ZoneOffset.UTC);
-            OffsetDateTime reservationEnd = reservation.getEndDate()
-                    .toInstant()
-                    .atOffset(ZoneOffset.UTC);
-
-            isCrossingBefore = reservationEnd.isAfter(end) && reservationStart.isBefore(end);
-            isCrossingAfter = reservationStart.isBefore(start) && reservationEnd.isAfter(start);
-            isStartOrEndEqual = reservationStart.isEqual(start) || reservationEnd.isEqual(end);
+    private boolean hasReservationCross(Reservation reservation, LocalDate start, LocalDate end) {
+        if (reservation == null) {
+            return false;
         }
 
+        LocalDate resStart = reservation.getStartDate();
+        LocalDate resEnd = reservation.getEndDate();
 
-        return isCrossingBefore || isCrossingAfter || isStartOrEndEqual;
+        if (resStart == null || resEnd == null) {
+            return false;
+        }
+
+        return !resEnd.isBefore(start) && !resStart.isAfter(end);
     }
-
 }
